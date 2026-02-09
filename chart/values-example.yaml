@@ -35,12 +35,28 @@ config:
 #       Auth:
 #         JwtSecret: "production-secret"
 
-# Example 4: Use existing Kubernetes Secret/ConfigMap
+# Example 4: Enable Ingress with TLS
+# ingress:
+#   enabled: true
+#   className: "nginx"
+#   annotations:
+#     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#   hosts:
+#     - host: nbomber-studio.example.com
+#       paths:
+#         - path: /
+#           pathType: Prefix
+#   tls:
+#     - secretName: nbomber-studio-tls
+#       hosts:
+#         - nbomber-studio.example.com
+
+# Example 5: Use existing Kubernetes Secret/ConfigMap
 # config:
 #   existingSecret: "my-nbomber-secret"
 #   existingConfigMap: "my-nbomber-config"
 
-# Example 5: Override Auth settings with static users
+# Example 6: Override Auth settings with static users
 # config:
 #   secret:
 #     enabled: true

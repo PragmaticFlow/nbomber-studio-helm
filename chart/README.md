@@ -4,7 +4,7 @@ This Helm chart deploys NBomber Studio on Kubernetes.
 
 ## Configuration Overrides
 
-NBomber Studio reads `config.json` from the root folder. This Helm chart allows you to override configuration values using Kubernetes ConfigMaps and Secrets.
+This Helm chart allows you to override configuration values using Kubernetes ConfigMaps and Secrets.
 
 ### Architecture
 
@@ -12,7 +12,7 @@ The configuration override system works as follows:
 
 1. **ConfigMap** - For non-sensitive settings (logging levels, feature flags, etc.)
 2. **Secret** - For sensitive settings (database passwords, JWT secrets, etc.)
-3. Both are mounted into the container and your application should merge them with the default config.json
+3. Both are mounted into the container.
 
 ### Usage
 
@@ -111,11 +111,6 @@ When enabled, the following files are mounted in the container:
 - `/app/config-override-cm.json` - ConfigMap overrides
 - `/app/config-override-secret.json` - Secret overrides
 
-**Note**: Your application needs to merge these files with the default `config.json`. The typical merge order is:
-1. Default config.json
-2. config-override-cm.json (ConfigMap)
-3. config-override-secret.json (Secret - highest priority)
-
 ### Security Best Practices
 
 1. **Always use Secrets for sensitive data** like passwords, JWT secrets, connection strings
@@ -125,6 +120,66 @@ When enabled, the following files are mounted in the container:
    - External Secrets Operator
    - HashiCorp Vault
    - AWS Secrets Manager / Azure Key Vault / GCP Secret Manager
+
+## Ingress
+
+To expose NBomber Studio externally with HTTPS/TLS, enable the ingress resource:
+
+```yaml
+ingress:
+  enabled: true
+  className: "traefik"  # or "nginx", depending on your ingress controller
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: nbomber-studio.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nbomber-studio-tls
+      hosts:
+        - nbomber-studio.example.com
+```
+
+#### Using NGINX Ingress Controller
+
+```yaml
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: nbomber-studio.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nbomber-studio-tls
+      hosts:
+        - nbomber-studio.example.com
+```
+
+#### Using cert-manager for Automatic TLS
+
+```yaml
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: nbomber-studio.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nbomber-studio-tls
+      hosts:
+        - nbomber-studio.example.com
+```
 
 ### Examples
 
@@ -172,6 +227,8 @@ helm upgrade nbomber-studio ./chart -f my-values.yaml
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
+| `nameOverride` | Override the chart name | `""` |
+| `fullnameOverride` | Override the full name of resources | `""` |
 | `image.repository` | NBomber Studio image repository | `nbomberdocker/nbomber-studio` |
 | `image.tag` | Image tag (defaults to Chart appVersion) | `""` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
@@ -185,6 +242,11 @@ helm upgrade nbomber-studio ./chart -f my-values.yaml
 | `config.secret.data` | Secret data (JSON structure) | `{}` |
 | `config.existingConfigMap` | Use existing ConfigMap | `""` |
 | `config.existingSecret` | Use existing Secret | `""` |
+| `ingress.enabled` | Enable ingress resource | `false` |
+| `ingress.className` | Ingress class name | `"traefik"` |
+| `ingress.annotations` | Ingress annotations | `{}` |
+| `ingress.hosts` | Ingress host configurations | see [values.yaml](values.yaml) |
+| `ingress.tls` | Ingress TLS configuration | `[]` |
 | `nodeSelector` | Node labels for pod assignment | `{}` |
 | `affinity` | Affinity rules | `{}` |
 | `tolerations` | Tolerations for pod assignment | `[]` |
