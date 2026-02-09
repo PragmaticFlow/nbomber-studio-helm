@@ -1,0 +1,59 @@
+# Example values file showing how to override config.json settings
+# Copy this file and customize it for your environment
+
+# Example 1: Override PostgreSQL connection using Secret
+config:
+  secret:
+    enabled: true
+    data:
+      PostgreSql:
+        ConnectionString: "Host=my-postgres.default.svc.cluster.local;Port=5432;Username=nbomber;Password=mySecurePassword;Database=nb_studio_db;Pooling=true;Maximum Pool Size=300;"
+      Auth:
+        JwtSecret: "your-very-secure-jwt-secret-key-here"
+        JwtExpireSec: 86400
+
+# Example 2: Override Logger level using ConfigMap
+# config:
+#   configMap:
+#     enabled: true
+#     data:
+#       Logger:
+#         MinimumLogLevel: "Debug"
+
+# Example 3: Use both ConfigMap and Secret
+# config:
+#   configMap:
+#     enabled: true
+#     data:
+#       Logger:
+#         MinimumLogLevel: "Warning"
+#   secret:
+#     enabled: true
+#     data:
+#       PostgreSql:
+#         ConnectionString: "Host=production-db;Port=5432;..."
+#       Auth:
+#         JwtSecret: "production-secret"
+
+# Example 4: Use existing Kubernetes Secret/ConfigMap
+# config:
+#   existingSecret: "my-nbomber-secret"
+#   existingConfigMap: "my-nbomber-config"
+
+# Example 5: Override Auth settings with static users
+# config:
+#   secret:
+#     enabled: true
+#     data:
+#       Auth:
+#         Enabled: true
+#         JwtSecret: "my-jwt-secret"
+#         JwtExpireSec: 86400
+#         StaticUserAuth:
+#           Users:
+#             - Email: "admin@company.com"
+#               Hash: "$2y$10$heuMG7aElXF5IiS4rCN49.T.smRQfhlCmVuoAh/SPpjQ6YA6qzZO6"
+#               UserName: "admin"
+#             - Email: "user@company.com"
+#               Hash: "$2y$10$anotherHashValue"
+#               UserName: "user"

@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nbomber-studio.fullname" . }}
+  labels:
+    {{- include "nbomber-studio.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nbomber-studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nbomber-studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}
+        
+        args:
+        {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
+        - "--config"
+        - "/app/config-override-cm.json"
+        {{- end }}
+        {{- if or .Values.config.secret.enabled .Values.config.existingSecret }}
+        - "--config"
+        - "/app/config-override-secret.json"
+        {{- end }}
+        {{- end }}
+        
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        
+        {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}        
+        volumeMounts:
+        {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
+        - name: config-override-cm
+          mountPath: /app/config-override-cm.json
+          subPath: config-override.json
+          readOnly: true
+        {{- end }}
+        {{- if or .Values.config.secret.enabled .Values.config.existingSecret }}
+        - name: config-override-secret
+          mountPath: /app/config-override-secret.json
+          subPath: config-override.json
+          readOnly: true
+        {{- end }}
+        {{- end }}
+        
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+          
+      {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}
+      volumes:
+      {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
+      - name: config-override-cm
+        configMap:
+          name: {{ .Values.config.existingConfigMap | default (printf "%s-config" (include "nbomber-studio.fullname" .)) }}
+      {{- end }}
+      {{- if or .Values.config.secret.enabled .Values.config.existingSecret }}
+      - name: config-override-secret
+        secret:
+          secretName: {{ .Values.config.existingSecret | default (printf "%s-config" (include "nbomber-studio.fullname" .)) }}
+      {{- end }}
+      {{- end }}

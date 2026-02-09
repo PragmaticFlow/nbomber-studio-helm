@@ -1,0 +1,71 @@
+# Override the chart name
+nameOverride: ""
+# Override the full name of resources
+fullnameOverride: ""
+
+image:
+  repository: nbomberdocker/nbomber-studio
+  pullPolicy: IfNotPresent
+  tag: ""  # Empty means use Chart.AppVersion
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    memory: "2Gi"
+  requests:
+    memory: "500Mi"
+
+# Configuration overrides
+# You can override the default config.json using ConfigMap and/or Secret
+config:
+  # Use ConfigMap for non-sensitive configuration
+  # This will be merged with the default config.json
+  configMap:
+    enabled: false
+    data:
+      Logger:
+        MinimumLogLevel: "Debug"
+
+  # Use Secret for sensitive configuration (PostgreSQL, Auth settings)
+  # This will be merged with the default config.json
+  secret:    
+    enabled: false
+    data:
+      PostgreSql:
+        ConnectionString: "Host=nbomber-timescale;Port=5432;Username=timescaledb;Password=admin;Database=timescaledb;Pooling=true;Maximum Pool Size=300;"
+
+  # Alternative: use existing Secret/ConfigMap instead of creating new ones
+  existingConfigMap: ""  # Name of existing ConfigMap
+  existingSecret: ""     # Name of existing Secret
+
+# Ingress configuration for HTTPS/TLS
+ingress:
+  enabled: false
+  className: "traefik"  # Use your ingress controller class (nginx, traefik, etc.)
+  annotations: 
+    # Example annotations for traefik:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+    # Example annotations for cert-manager (automatic Let's Encrypt certificates):
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Example annotations for NGINX:
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"    
+  hosts:
+    - host: nbomber-studio.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nbomber-studio-tls
+      hosts:
+        - nbomber-studio.local  
+
+# Node scheduling
+nodeSelector: {}
+affinity: {}
+tolerations: []
