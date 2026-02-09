@@ -2,6 +2,8 @@
 
 A Helm chart for deploying NBomber Studio on Kubernetes.
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/nbomber-studio)](https://artifacthub.io/packages/search?repo=nbomber-studio)
+
 ## Overview
 
 This chart deploys:
