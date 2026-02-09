@@ -8,17 +8,17 @@ This guide explains how to enable HTTPS for NBomber Studio using Kubernetes Ingr
 
 You need an Ingress Controller installed in your cluster. Popular options:
 
+#### Traefik
+```bash
+helm repo add traefik https://traefik.github.io/charts
+helm install traefik traefik/traefik
+```
+
 #### NGINX Ingress Controller (Recommended)
 ```bash
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 helm install ingress-nginx ingress-nginx/ingress-nginx
-```
-
-#### Traefik
-```bash
-helm repo add traefik https://traefik.github.io/charts
-helm install traefik traefik/traefik
 ```
 
 ### 2. Certificate Options
@@ -89,6 +89,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: nbomber-studio.example.com
       paths:

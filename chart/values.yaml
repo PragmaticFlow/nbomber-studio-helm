@@ -49,12 +49,12 @@ ingress:
     # Example annotations for traefik:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-
-    # Example annotations for cert-manager (automatic Let's Encrypt certificates):
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
     # Example annotations for NGINX:
     # nginx.ingress.kubernetes.io/ssl-redirect: "true"
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"    
+    # Example annotations for cert-manager (automatic Let's Encrypt certificates):
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
   hosts:
     - host: nbomber-studio.local
       paths:

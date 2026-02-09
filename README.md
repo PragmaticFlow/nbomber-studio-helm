@@ -4,11 +4,7 @@ This Helm chart deploys NBomber Studio on Kubernetes.
 
 ## Configuration Overrides
 
-This Helm chart allows you to override configuration values using Kubernetes ConfigMaps and Secrets.
-
-### Architecture
-
-The configuration override system works as follows:
+This Helm chart allows you to override configuration values using Kubernetes ConfigMaps and Secrets. The configuration override system works as follows:
 
 1. **ConfigMap** - For non-sensitive settings (logging levels, feature flags, etc.)
 2. **Secret** - For sensitive settings (database passwords, JWT secrets, etc.)
