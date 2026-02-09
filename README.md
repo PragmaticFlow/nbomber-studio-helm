@@ -1,6 +1,68 @@
 # NBomber Studio Helm Chart
 
-This Helm chart deploys NBomber Studio on Kubernetes.
+A Helm chart for deploying NBomber Studio on Kubernetes.
+
+## Overview
+
+This chart deploys:
+- An NBomber Studio Deployment
+- A ClusterIP service for internal access
+- Optional ConfigMap and Secret for configuration overrides
+- Optional Ingress resource for external HTTPS access
+
+It is designed for simplicity and can be used in development, testing, or production environments.
+
+### Installation
+
+Add repository
+```bash
+helm repo add nbomber-studio https://pragmaticflow.github.io/nbomber-studio-helm/
+```
+
+Install chart
+```bash
+helm install nbomber-studio nbomber-studio/nbomber-studio
+```
+
+Install with custom values
+```bash
+helm install nbomber-studio nbomber-studio/nbomber-studio -f my-values.yaml
+```
+
+Upgrade
+```bash
+helm upgrade nbomber-studio nbomber-studio/nbomber-studio -f my-values.yaml
+```
+
+### Parameters
+
+The following table lists the configurable parameters of the chart and their default values:
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `nameOverride` | Override the chart name | `""` |
+| `fullnameOverride` | Override the full name of resources | `""` |
+| `image.repository` | NBomber Studio image repository | `nbomberdocker/nbomber-studio` |
+| `image.tag` | Image tag (defaults to Chart appVersion) | `""` |
+| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `service.type` | Kubernetes service type | `ClusterIP` |
+| `service.port` | Service port | `80` |
+| `resources.limits.memory` | Memory limit | `2Gi` |
+| `resources.requests.memory` | Memory request | `500Mi` |
+| `config.configMap.enabled` | Create ConfigMap for config overrides | `false` |
+| `config.configMap.data` | ConfigMap data (JSON structure) | `{}` |
+| `config.secret.enabled` | Create Secret for config overrides | `false` |
+| `config.secret.data` | Secret data (JSON structure) | `{}` |
+| `config.existingConfigMap` | Use existing ConfigMap | `""` |
+| `config.existingSecret` | Use existing Secret | `""` |
+| `ingress.enabled` | Enable ingress resource | `false` |
+| `ingress.className` | Ingress class name | `"traefik"` |
+| `ingress.annotations` | Ingress annotations | `{}` |
+| `ingress.hosts` | Ingress host configurations | see [values.yaml](values.yaml) |
+| `ingress.tls` | Ingress TLS configuration | `[]` |
+| `nodeSelector` | Node labels for pod assignment | `{}` |
+| `affinity` | Affinity rules | `{}` |
+| `tolerations` | Tolerations for pod assignment | `[]` |
 
 ## Configuration Overrides
 
@@ -177,9 +239,11 @@ ingress:
         - nbomber-studio.example.com
 ```
 
-### Examples
+## Examples
 
 See [values-example.yaml](values-example.yaml) for complete examples.
+
+See [HTTPS-SETUP.md](HTTPS-SETUP.md) for a detailed guide on enabling HTTPS/TLS.
 
 #### Example: Production Database Override
 
@@ -205,44 +269,3 @@ config:
       Logger:
         MinimumLogLevel: "Debug"
 ```
-
-## Installation
-
-```bash
-# Install with default values
-helm install nbomber-studio ./chart
-
-# Install with custom values
-helm install nbomber-studio ./chart -f my-values.yaml
-
-# Upgrade
-helm upgrade nbomber-studio ./chart -f my-values.yaml
-```
-
-## Parameters
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `nameOverride` | Override the chart name | `""` |
-| `fullnameOverride` | Override the full name of resources | `""` |
-| `image.repository` | NBomber Studio image repository | `nbomberdocker/nbomber-studio` |
-| `image.tag` | Image tag (defaults to Chart appVersion) | `""` |
-| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `service.type` | Kubernetes service type | `ClusterIP` |
-| `service.port` | Service port | `80` |
-| `resources.limits.memory` | Memory limit | `2Gi` |
-| `resources.requests.memory` | Memory request | `500Mi` |
-| `config.configMap.enabled` | Create ConfigMap for config overrides | `false` |
-| `config.configMap.data` | ConfigMap data (JSON structure) | `{}` |
-| `config.secret.enabled` | Create Secret for config overrides | `false` |
-| `config.secret.data` | Secret data (JSON structure) | `{}` |
-| `config.existingConfigMap` | Use existing ConfigMap | `""` |
-| `config.existingSecret` | Use existing Secret | `""` |
-| `ingress.enabled` | Enable ingress resource | `false` |
-| `ingress.className` | Ingress class name | `"traefik"` |
-| `ingress.annotations` | Ingress annotations | `{}` |
-| `ingress.hosts` | Ingress host configurations | see [values.yaml](values.yaml) |
-| `ingress.tls` | Ingress TLS configuration | `[]` |
-| `nodeSelector` | Node labels for pod assignment | `{}` |
-| `affinity` | Affinity rules | `{}` |
-| `tolerations` | Tolerations for pod assignment | `[]` |
