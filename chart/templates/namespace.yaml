@@ -1,0 +1,8 @@
+{{- if .Values.testNamespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.testNamespace.name }}
+  labels:
+    {{- include "nbomber-studio.labels" . | nindent 4 }}
+{{- end }}

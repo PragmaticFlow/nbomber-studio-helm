@@ -65,6 +65,18 @@ ingress:
       hosts:
         - nbomber-studio.local  
 
+# ServiceAccount for the Studio pod
+serviceAccount:
+  create: true
+  name: ""        # Leave empty to use the auto-generated name
+  annotations: {}
+
+# Separate namespace where Studio deploys NBomber test Jobs/Pods/Secrets.
+# Studio has full access here but cannot touch any other namespace.
+testNamespace:
+  name: "nbomber-tests"
+  create: true    # Set to false if the namespace already exists
+
 # Node scheduling
 nodeSelector: {}
 affinity: {}
