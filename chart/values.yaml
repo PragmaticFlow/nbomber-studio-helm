@@ -31,11 +31,12 @@ config:
 
   # Use Secret for sensitive configuration (PostgreSQL, Auth settings)
   # This will be merged with the default config.json
-  secret:    
+  secret:
     enabled: false
     data:
       PostgreSql:
         ConnectionString: "Host=nbomber-timescale;Port=5432;Username=timescaledb;Password=admin;Database=timescaledb;Pooling=true;Maximum Pool Size=300;"
+      License: ""
 
   # Alternative: use existing Secret/ConfigMap instead of creating new ones
   existingConfigMap: ""  # Name of existing ConfigMap
