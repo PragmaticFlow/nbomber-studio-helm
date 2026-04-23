@@ -27,20 +27,14 @@ jobs:
           git clone --branch gh-pages --depth 1 \
           https://github.com/PragmaticFlow/nbomber-studio-helm gh-pages || mkdir gh-pages
 
-      # Merge old index with new packages
-      - name: Merge existing index.yaml
+      # Copy existing chart packages alongside the new one, then index all present files
+      - name: Build index.yaml from present packages
         run: |
-          if [ -f gh-pages/index.yaml ]; then
-            helm repo index packaged \
-              --merge gh-pages/index.yaml \
-              --url https://pragmaticflow.github.io/nbomber-studio-helm/
-          else
-            echo "No existing index.yaml found — creating new one"
-            helm repo index packaged \
-              --url https://pragmaticflow.github.io/nbomber-studio-helm/
-          fi
+          find gh-pages -maxdepth 1 -name '*.tgz' -exec cp {} packaged/ \;
+          helm repo index packaged \
+            --url https://pragmaticflow.github.io/nbomber-studio-helm/
 
-      # Move new packaged files into gh-pages folder
+      # Move packaged files (charts + index) into gh-pages folder
       - name: Move packaged files
         run: |
           cp -r packaged/* gh-pages/
