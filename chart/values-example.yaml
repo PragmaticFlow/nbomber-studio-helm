@@ -56,20 +56,6 @@ config:
 #   existingSecret: "my-nbomber-secret"
 #   existingConfigMap: "my-nbomber-config"
 
-# Example 7: Custom test namespace and service account
-# testNamespace:
-#   name: "nbomber-tests-prod"
-#   create: true
-# serviceAccount:
-#   create: true
-#   annotations:
-#     eks.amazonaws.com/role-arn: "arn:aws:iam::role/nbomber-studio"
-
-# Example 8: Use pre-existing test namespace (e.g. created by GitOps)
-# testNamespace:
-#   name: "my-test-namespace"
-#   create: false
-
 # Example 6: Override Auth settings with static users
 # config:
 #   secret:
@@ -87,3 +73,17 @@ config:
 #             - Email: "user@company.com"
 #               Hash: "$2y$10$anotherHashValue"
 #               UserName: "user"
+
+# Example 7: Custom test namespace and service account
+# testNamespace:
+#   name: "nbomber-tests-prod"
+#   create: true
+# serviceAccount:
+#   create: true
+#   annotations:
+#     eks.amazonaws.com/role-arn: "arn:aws:iam::role/nbomber-studio"
+
+# Example 8: Use pre-existing test namespace (e.g. created by GitOps)
+# testNamespace:
+#   name: "my-test-namespace"
+#   create: false

@@ -8,9 +8,15 @@ A Helm chart for deploying NBomber Studio on Kubernetes.
 
 This chart deploys:
 - An NBomber Studio Deployment
+- A ServiceAccount, Role, and RoleBinding scoped to the test namespace
+- A dedicated test namespace (default: `nbomber-tests`) for running NBomber test Jobs and Pods
 - A ClusterIP service for internal access
 - Optional ConfigMap and Secret for configuration overrides
 - Optional Ingress resource for external HTTPS access
+
+NBomber Studio automatically creates a dedicated Kubernetes namespace (default: `nbomber-tests`) where it deploys and runs NBomber test Jobs and Pods.
+
+**Dependencies:** NBomber Studio requires [PostgreSQL with the TimescaleDB extension](https://docs.timescale.com/) for storing test metrics and results. Make sure a TimescaleDB-enabled PostgreSQL instance is accessible before installing this chart. The NBomber team provides a ready-to-use [Timescale Helm chart on Artifact Hub](https://artifacthub.io/packages/helm/timescale/timescale) to simplify this setup.
 
 It is designed for simplicity and can be used in development, testing, or production environments.
 
@@ -62,9 +68,49 @@ The following table lists the configurable parameters of the chart and their def
 | `ingress.annotations` | Ingress annotations | `{}` |
 | `ingress.hosts` | Ingress host configurations | see [values.yaml](values.yaml) |
 | `ingress.tls` | Ingress TLS configuration | `[]` |
+| `serviceAccount.create` | Create a ServiceAccount for the Studio pod | `true` |
+| `serviceAccount.name` | ServiceAccount name (auto-generated if empty) | `""` |
+| `serviceAccount.annotations` | Annotations to add to the ServiceAccount | `{}` |
+| `testNamespace.name` | Namespace where NBomber test Jobs/Pods are deployed | `nbomber-tests` |
+| `testNamespace.create` | Create the test namespace (set to `false` if it already exists) | `true` |
 | `nodeSelector` | Node labels for pod assignment | `{}` |
 | `affinity` | Affinity rules | `{}` |
 | `tolerations` | Tolerations for pod assignment | `[]` |
+
+## RBAC and Test Namespace
+
+This chart automatically provisions the Kubernetes RBAC resources needed for NBomber Studio to manage test workloads:
+
+| Resource | Name | Scope |
+|----------|------|-------|
+| Namespace | `nbomber-tests` (configurable) | cluster |
+| ServiceAccount | `<release-name>-nbomber-studio` | Studio's namespace |
+| Role | `<release-name>-nbomber-studio-test-manager` | test namespace |
+| RoleBinding | `<release-name>-nbomber-studio-test-manager` | test namespace |
+
+The Role grants the Studio pod permissions to manage the following resources **only within the test namespace**:
+
+- `pods`, `pods/log` — get, list, watch, create, delete
+- `secrets` — get, list, create, update, patch, delete
+- `services` — get, list, create, delete
+- `deployments` (apps) — get, list, watch, create, delete
+- `jobs` (batch) — get, list, watch, create, delete
+
+To use an existing namespace instead of creating a new one:
+
+```yaml
+testNamespace:
+  name: "my-existing-namespace"
+  create: false
+```
+
+To use an existing ServiceAccount:
+
+```yaml
+serviceAccount:
+  create: false
+  name: "my-service-account"
+```
 
 ## Configuration Overrides
 
