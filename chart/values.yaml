@@ -24,10 +24,12 @@ config:
   # Use ConfigMap for non-sensitive configuration
   # This will be merged with the default config.json
   configMap:
-    enabled: false
+    enabled: true
     data:
       Logger:
-        MinimumLogLevel: "Debug"
+        MinimumLogLevel: "Information"
+      Kubernetes:
+        Enabled: true
 
   # Use Secret for sensitive configuration (PostgreSQL, Auth settings)
   # This will be merged with the default config.json
@@ -36,6 +38,8 @@ config:
     data:
       PostgreSql:
         ConnectionString: "Host=nbomber-timescale;Port=5432;Username=timescaledb;Password=admin;Database=timescaledb;Pooling=true;Maximum Pool Size=300;"
+      Auth:
+        Enabled: true        
       License: ""
 
   # Alternative: use existing Secret/ConfigMap instead of creating new ones
