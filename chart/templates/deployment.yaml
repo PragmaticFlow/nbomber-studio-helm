@@ -31,9 +31,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}
-        
         args:
+        - "--test-namespace"
+        - {{ .Values.testNamespace.name | quote }}
         {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
         - "--config"
         - "/app/config-override-cm.json"
@@ -42,11 +42,7 @@ spec:
         - "--config"
         - "/app/config-override-secret.json"
         {{- end }}
-        {{- end }}
-        
-        env:
-        - name: NBOMBER_TEST_NAMESPACE
-          value: {{ .Values.testNamespace.name | quote }}
+
         ports:
         - name: http
           containerPort: 8080
