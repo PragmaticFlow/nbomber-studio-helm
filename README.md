@@ -132,10 +132,15 @@ config:
     enabled: true
     data:
       PostgreSql:
-        ConnectionString: "Host=my-db;Port=5432;Username=user;Password=pass;Database=mydb"
+        ConnectionString: "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;Username=user;Password=pass;Database=mydb"
       Auth:
         JwtSecret: "your-secure-jwt-secret"
 ```
+
+> **Important:** Always use the full Kubernetes FQDN for the PostgreSQL host:
+> `<service>.<namespace>.svc.cluster.local`
+>
+> NBomber test Jobs run in a dedicated test namespace (see `testNamespace`), which is separate from the namespace where PostgreSQL is installed. A short hostname resolves only within the same namespace and will cause connection failures from the test Jobs.
 
 Override non-sensitive settings using a ConfigMap:
 
@@ -166,7 +171,7 @@ Create a secret from command line:
 kubectl create secret generic nbomber-studio-config \
   --from-literal=config-override.json='{
     "PostgreSql": {
-      "ConnectionString": "Host=my-db;Port=5432;..."
+      "ConnectionString": "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;..."
     },
     "Auth": {
       "JwtSecret": "my-secret-key"
@@ -188,7 +193,7 @@ The override configuration follows the same JSON structure as the default `confi
 ```json
 {
   "PostgreSql": {
-    "ConnectionString": "Host=localhost;Port=5432;..."
+    "ConnectionString": "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;..."
   },
   "Logger": {
     "MinimumLogLevel": "Information"

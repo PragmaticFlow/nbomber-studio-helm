@@ -1,3 +1,7 @@
+{{- $hasSecret := or .Values.config.secret.enabled .Values.config.existingSecret }}
+{{- if not $hasSecret }}
+  {{- fail "A PostgreSQL connection string is required. Set config.secret.enabled=true with config.secret.data.PostgreSql.ConnectionString, or set config.existingSecret to the name of an existing Secret. Use the full K8s FQDN for the host (e.g. my-pg.default.svc.cluster.local) so that NBomber test Jobs running in a separate namespace can reach PostgreSQL." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

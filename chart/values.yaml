@@ -33,11 +33,19 @@ config:
 
   # Use Secret for sensitive configuration (PostgreSQL, Auth settings)
   # This will be merged with the default config.json
+  # REQUIRED: you must either set secret.enabled=true with a PostgreSql.ConnectionString,
+  # or provide config.existingSecret pointing to an existing Secret.
+  #
+  # IMPORTANT: Use the full K8s FQDN for the PostgreSQL host:
+  #   <service>.<namespace>.svc.cluster.local
+  # NBomber test Jobs run in testNamespace (see below), which is a different namespace
+  # from where PostgreSQL is installed. A short hostname (without namespace) only resolves
+  # within the same namespace and will cause connection failures from the test namespace.
   secret:
-    enabled: false
+    enabled: true
     data:
       PostgreSql:
-        ConnectionString: "Host=nbomber-timescale;Port=5432;Username=timescaledb;Password=admin;Database=timescaledb;Pooling=true;Maximum Pool Size=300;"
+        ConnectionString: "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;Username=nb_studio_db;Password=nb_studio_db;Database=nb_studio_db;Pooling=true;Maximum Pool Size=300;"
       Auth:
         Enabled: true        
       License: ""
