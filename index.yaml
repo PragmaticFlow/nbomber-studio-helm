@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   nbomber-studio:
   - apiVersion: v2
+    appVersion: 0.7.0-beta.1
+    created: "2026-05-04T09:39:31.948435037Z"
+    description: A Helm chart for NBomber Studio
+    digest: 1717e24b6cddee84733f51ef36b3752219635c05afcb6d71a4c5889fee60ca9f
+    name: nbomber-studio
+    type: application
+    urls:
+    - https://pragmaticflow.github.io/nbomber-studio-helm/nbomber-studio-0.3.0-beta.0.tgz
+    version: 0.3.0-beta.0
+  - apiVersion: v2
     appVersion: 0.6.2-noble-chiseled
-    created: "2026-04-25T11:26:54.84133744Z"
+    created: "2026-05-04T09:39:31.947935162Z"
     description: A Helm chart for NBomber Studio
     digest: cba3d7cdecb1cacf700b208a3324afc2f4d15e9f7782d1c834779be2063926a0
     name: nbomber-studio
@@ -13,7 +23,7 @@ entries:
     version: 0.2.0-beta.1
   - apiVersion: v2
     appVersion: 0.6.2-noble-chiseled
-    created: "2026-04-25T11:26:54.840973711Z"
+    created: "2026-05-04T09:39:31.947426455Z"
     description: A Helm chart for NBomber Studio
     digest: 92aa7d891bb7cd622f1847050e7a3562087bbb9b1d7cf4ee249bd7191014d022
     name: nbomber-studio
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://pragmaticflow.github.io/nbomber-studio-helm/nbomber-studio-0.2.0-beta.0.tgz
     version: 0.2.0-beta.0
-generated: "2026-04-25T11:26:54.840200669Z"
+generated: "2026-05-04T09:39:31.94681219Z"
