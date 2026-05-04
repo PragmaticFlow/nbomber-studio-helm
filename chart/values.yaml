@@ -42,7 +42,7 @@ config:
   # from where PostgreSQL is installed. A short hostname (without namespace) only resolves
   # within the same namespace and will cause connection failures from the test namespace.
   secret:
-    enabled: true
+    enabled: false
     data:
       PostgreSql:
         ConnectionString: "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;Username=nb_studio_db;Password=nb_studio_db;Database=nb_studio_db;Pooling=true;Maximum Pool Size=300;"
