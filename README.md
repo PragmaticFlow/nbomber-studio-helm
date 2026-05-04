@@ -22,22 +22,73 @@ It is designed for simplicity and can be used in development, testing, or produc
 
 ### Installation
 
-Add repository
+**Step 1 — Add the Helm repository**
+
 ```bash
 helm repo add nbomber-studio https://pragmaticflow.github.io/nbomber-studio-helm/
+helm repo update
 ```
 
-Install chart
+**Step 2 — Install the chart with the required Secret**
+
+> **A PostgreSQL connection string is required.** Set `config.secret.enabled=true` with `config.secret.data.PostgreSql.ConnectionString`, or set `config.existingSecret` to the name of an existing Secret. **Make sure to use the full K8s domain name for the PostgreSQL host** (e.g. `nbomber-timescale.default.svc.cluster.local`) so that NBomber test Jobs running in a separate namespace can reach PostgreSQL.
+
+**Option A — with authentication enabled (recommended for production):**
+
+Inline with `--set` flags:
+
 ```bash
-helm install nbomber-studio nbomber-studio/nbomber-studio
+helm install nbomber-studio nbomber-studio/nbomber-studio \
+  --set config.secret.enabled=true \
+  --set-string "config.secret.data.PostgreSql.ConnectionString=Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>" \
+  --set-string "config.secret.data.Auth.JwtSecret=<your-secure-jwt-secret>"
 ```
 
-Install with custom values
+Using a `values.yaml` file (recommended for complex connection strings):
+
+```yaml
+config:
+  secret:
+    enabled: true
+    data:
+      PostgreSql:
+        ConnectionString: "Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>;Pooling=true;Maximum Pool Size=300;"
+      Auth:
+        JwtSecret: "<your-secure-jwt-secret>"  # generate with: openssl rand -base64 32
+```
+
+**Option B — without authentication (for local/dev environments only):**
+
+Set `Auth.Enabled=false` to skip JWT configuration entirely:
+
+```bash
+helm install nbomber-studio nbomber-studio/nbomber-studio \
+  --set config.secret.enabled=true \
+  --set-string "config.secret.data.PostgreSql.ConnectionString=Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>" \
+  --set config.secret.data.Auth.Enabled=false
+```
+
+Or in a `values.yaml` file:
+
+```yaml
+config:
+  secret:
+    enabled: true
+    data:
+      PostgreSql:
+        ConnectionString: "Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>;Pooling=true;Maximum Pool Size=300;"
+      Auth:
+        Enabled: false
+```
+
 ```bash
 helm install nbomber-studio nbomber-studio/nbomber-studio -f my-values.yaml
 ```
 
-Upgrade
+> Use the full Kubernetes FQDN for the PostgreSQL host (`<service>.<namespace>.svc.cluster.local`). A short hostname will fail because NBomber test Jobs run in a separate namespace.
+
+**Upgrade**
+
 ```bash
 helm upgrade nbomber-studio nbomber-studio/nbomber-studio -f my-values.yaml
 ```
