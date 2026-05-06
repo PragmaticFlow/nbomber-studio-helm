@@ -33,33 +33,13 @@ helm repo update
 
 > **A PostgreSQL connection string is required.** Set `config.secret.enabled=true` with `config.secret.data.PostgreSql.ConnectionString`, or set `config.existingSecret` to the name of an existing Secret. **Make sure to use the full K8s domain name for the PostgreSQL host** (e.g. `nbomber-timescale.default.svc.cluster.local`) so that NBomber test Jobs running in a separate namespace can reach PostgreSQL.
 
-**Option A — with authentication enabled (recommended for production):**
+**Option A — without authentication (for local/dev environments only):**
 
 Inline with `--set` flags:
 
-```bash
-helm install nbomber-studio nbomber-studio/nbomber-studio \
-  --set config.secret.enabled=true \
-  --set-string "config.secret.data.PostgreSql.ConnectionString=Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>" \
-  --set-string "config.secret.data.Auth.JwtSecret=<your-secure-jwt-secret>"
-```
+> Use the full Kubernetes domain hostname for the PostgreSQL host (`<service>.<namespace>.svc.cluster.local`). A short hostname will fail because NBomber test Jobs run in a separate namespace.
 
-Using a `values.yaml` file (recommended for complex connection strings):
-
-```yaml
-config:
-  secret:
-    enabled: true
-    data:
-      PostgreSql:
-        ConnectionString: "Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>;Pooling=true;Maximum Pool Size=300;"
-      Auth:
-        JwtSecret: "<your-secure-jwt-secret>"  # generate with: openssl rand -base64 32
-```
-
-**Option B — without authentication (for local/dev environments only):**
-
-Set `Auth.Enabled=false` to skip JWT configuration entirely:
+> Set `Auth.Enabled=false` to skip JWT configuration entirely.
 
 ```bash
 helm install nbomber-studio nbomber-studio/nbomber-studio \
@@ -85,7 +65,29 @@ config:
 helm install nbomber-studio nbomber-studio/nbomber-studio -f my-values.yaml
 ```
 
-> Use the full Kubernetes FQDN for the PostgreSQL host (`<service>.<namespace>.svc.cluster.local`). A short hostname will fail because NBomber test Jobs run in a separate namespace.
+**Option B — with authentication enabled (recommended for production):**
+
+Inline with `--set` flags:
+
+```bash
+helm install nbomber-studio nbomber-studio/nbomber-studio \
+  --set config.secret.enabled=true \
+  --set-string "config.secret.data.PostgreSql.ConnectionString=Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>" \
+  --set-string "config.secret.data.Auth.JwtSecret=<your-secure-jwt-secret>"
+```
+
+Using a `values.yaml` file (recommended for complex connection strings):
+
+```yaml
+config:
+  secret:
+    enabled: true
+    data:
+      PostgreSql:
+        ConnectionString: "Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>;Pooling=true;Maximum Pool Size=300;"
+      Auth:
+        JwtSecret: "<your-secure-jwt-secret>"  # generate with: openssl rand -base64 32
+```
 
 **Upgrade**
 
@@ -112,6 +114,7 @@ The following table lists the configurable parameters of the chart and their def
 | `config.configMap.data` | ConfigMap data (JSON structure) | `{}` |
 | `config.secret.enabled` | Create Secret for config overrides | `false` |
 | `config.secret.data` | Secret data (JSON structure) | `{}` |
+| `config.secret.data.License` | NBomber Studio license key | `""` |
 | `config.existingConfigMap` | Use existing ConfigMap | `""` |
 | `config.existingSecret` | Use existing Secret | `""` |
 | `ingress.enabled` | Enable ingress resource | `false` |
@@ -251,8 +254,7 @@ The override configuration follows the same JSON structure as the default `confi
   },
   "Auth": {
     "Enabled": true,
-    "JwtSecret": "your-secret-here",
-    "JwtExpireSec": 86400,
+    "JwtSecret": "your-secret-here",    
     "StaticUserAuth": {
       "Users": [
         {
@@ -272,6 +274,32 @@ When enabled, the following files are mounted in the container:
 
 - `/app/config-override-cm.json` - ConfigMap overrides
 - `/app/config-override-secret.json` - Secret overrides
+
+### License Key
+
+A license key is required to use NBomber Studio. Set it via the `License` field inside the secret data:
+
+```yaml
+config:
+  secret:
+    enabled: true
+    data:
+      License: "<your-license-key>"
+      PostgreSql:
+        ConnectionString: "Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>"
+      Auth:
+        JwtSecret: "<your-secure-jwt-secret>"
+```
+
+Or with `--set`:
+
+```bash
+helm install nbomber-studio nbomber-studio/nbomber-studio \
+  --set config.secret.enabled=true \
+  --set-string "config.secret.data.License=<your-license-key>" \
+  --set-string "config.secret.data.PostgreSql.ConnectionString=Host=<timescaledb-service>.<namespace>.svc.cluster.local;Port=5432;Username=<user>;Password=<password>;Database=<db>" \
+  --set-string "config.secret.data.Auth.JwtSecret=<your-secure-jwt-secret>"
+```
 
 ### Security Best Practices
 

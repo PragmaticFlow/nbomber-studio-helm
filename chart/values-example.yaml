@@ -9,8 +9,7 @@ config:
       PostgreSql:
         ConnectionString: "Host=my-postgres.default.svc.cluster.local;Port=5432;Username=nbomber;Password=mySecurePassword;Database=nb_studio_db;Pooling=true;Maximum Pool Size=300;"
       Auth:
-        JwtSecret: "your-very-secure-jwt-secret-key-here"
-        JwtExpireSec: 86400
+        JwtSecret: "your-very-secure-jwt-secret-key-here"        
 
 # Example 2: Override Logger level using ConfigMap
 # config:
@@ -64,7 +63,6 @@ config:
 #       Auth:
 #         Enabled: true
 #         JwtSecret: "my-jwt-secret"
-#         JwtExpireSec: 86400
 #         StaticUserAuth:
 #           Users:
 #             - Email: "admin@company.com"
