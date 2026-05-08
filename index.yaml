@@ -3,7 +3,17 @@ entries:
   nbomber-studio:
   - apiVersion: v2
     appVersion: 0.7.0
-    created: "2026-05-06T20:23:55.184546155Z"
+    created: "2026-05-08T13:16:03.121455323Z"
+    description: A Helm chart for NBomber Studio
+    digest: 6e00407d5f756adae18f70fa3d65f6b293769f82b878b30f144d360757b4ae4e
+    name: nbomber-studio
+    type: application
+    urls:
+    - https://pragmaticflow.github.io/nbomber-studio-helm/nbomber-studio-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v2
+    appVersion: 0.7.0
+    created: "2026-05-08T13:16:03.120921768Z"
     description: A Helm chart for NBomber Studio
     digest: 42763d1f9f14c66f895d65e6c6bf7cc0ea7a57f529f0aa4ee7501acc1b50df5f
     name: nbomber-studio
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://pragmaticflow.github.io/nbomber-studio-helm/nbomber-studio-0.3.0.tgz
     version: 0.3.0
-generated: "2026-05-06T20:23:55.183870603Z"
+generated: "2026-05-08T13:16:03.12020095Z"
