@@ -48,7 +48,10 @@ config:
         ConnectionString: "Host=nbomber-timescale.default.svc.cluster.local;Port=5432;Username=nb_studio_db;Password=nb_studio_db;Database=nb_studio_db;Pooling=true;Maximum Pool Size=300;"
       Auth:
         Enabled: true
-        JwtSecret: "your-secret-key"  # Change this to a strong secret in production       
+        
+        # Change this to a strong secret in production
+        # JwtSecret: ""
+
       License: ""
 
   # Alternative: use existing Secret/ConfigMap instead of creating new ones

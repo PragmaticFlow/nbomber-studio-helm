@@ -15,6 +15,13 @@ spec:
       {{- include "nbomber-studio.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        {{- if and .Values.config.configMap.enabled (not .Values.config.existingConfigMap) }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if and .Values.config.secret.enabled (not .Values.config.existingSecret) }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
       labels:
         {{- include "nbomber-studio.selectorLabels" . | nindent 8 }}
     spec:
