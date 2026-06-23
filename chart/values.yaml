@@ -58,6 +58,24 @@ config:
   existingConfigMap: ""  # Name of existing ConfigMap
   existingSecret: ""     # Name of existing Secret
 
+# Trust additional CA certificate(s) so the app trusts internally-issued
+# HTTPS endpoints. On Linux, .NET validates TLS against the OpenSSL system
+# trust store. Because SSL_CERT_FILE *replaces* that store rather than
+# extending it, an init container merges these CAs into the system bundle
+# so that publicly-trusted CAs keep working too.
+trustedCAs:
+  enabled: false
+  # Inline PEM CA cert(s). The chart creates a Secret from these; each key
+  # becomes a file that is appended to the trust bundle.
+  certs: {}
+    # internal-ca.crt: |
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+  # Alternative: reference an existing Secret containing PEM cert(s).
+  # Takes precedence over .certs when set.
+  existingSecret: ""
+
 # Ingress configuration for HTTPS/TLS
 ingress:
   enabled: false

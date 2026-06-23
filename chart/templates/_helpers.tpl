@@ -58,3 +58,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Name of the Secret holding trusted CA certificates
+*/}}
+{{- define "nbomber-studio.trustedCASecretName" -}}
+{{- .Values.trustedCAs.existingSecret | default (printf "%s-trusted-ca" (include "nbomber-studio.fullname" .)) }}
+{{- end }}

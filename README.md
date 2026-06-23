@@ -127,6 +127,9 @@ The following table lists the configurable parameters of the chart and their def
 | `serviceAccount.annotations` | Annotations to add to the ServiceAccount | `{}` |
 | `testNamespace.name` | Namespace where NBomber test Jobs/Pods are deployed | `nbomber-tests` |
 | `testNamespace.create` | Create the test namespace (set to `false` if it already exists) | `true` |
+| `trustedCAs.enabled` | Mount additional trusted CA cert(s) into the trust bundle | `false` |
+| `trustedCAs.certs` | Inline PEM CA cert(s); chart creates a Secret from these | `{}` |
+| `trustedCAs.existingSecret` | Use an existing Secret of PEM CA cert(s) instead of `certs` | `""` |
 | `nodeSelector` | Node labels for pod assignment | `{}` |
 | `affinity` | Affinity rules | `{}` |
 | `tolerations` | Tolerations for pod assignment | `[]` |
@@ -274,6 +277,34 @@ When enabled, the following files are mounted in the container:
 
 - `/app/config-override-cm.json` - ConfigMap overrides
 - `/app/config-override-secret.json` - Secret overrides
+
+### Trusting Internal CA Certificates
+
+If NBomber Studio must talk to an internally-issued HTTPS endpoint — for example a private OIDC/JWT issuer — the issuer's CA must be trusted by the container. NBomber Studio runs on .NET, which on Linux validates TLS against the OpenSSL system trust store, so it is not enough to simply place a `.crt` file in the pod.
+
+Enabling `trustedCAs` runs a small init container that merges the supplied CA certificate(s) into the system trust bundle and points the app at the result via `SSL_CERT_FILE`. Publicly-trusted CAs continue to work, because the merged bundle still contains the default roots.
+
+Provide the CA inline (the chart creates the Secret):
+
+```yaml
+trustedCAs:
+  enabled: true
+  certs:
+    internal-ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      ...your internal CA...
+      -----END CERTIFICATE-----
+```
+
+Or reference an existing Secret (e.g. one produced by cert-manager or External Secrets). Every key in the Secret is treated as a PEM file and appended to the bundle:
+
+```yaml
+trustedCAs:
+  enabled: true
+  existingSecret: "my-internal-ca"
+```
+
+> The init container reuses the NBomber Studio image, so the base trust bundle always matches the runtime image and no extra image is pulled.
 
 ### License Key
 
