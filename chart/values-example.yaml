@@ -85,3 +85,17 @@ config:
 # testNamespace:
 #   name: "my-test-namespace"
 #   create: false
+
+# Example 9: Trust an internal CA (e.g. for an internally-issued HTTPS endpoint)
+# trustedCAs:
+#   enabled: true
+#   certs:
+#     internal-ca.crt: |
+#       -----BEGIN CERTIFICATE-----
+#       ...your internal CA...
+#       -----END CERTIFICATE-----
+#
+# Or reference an existing Secret (e.g. produced by cert-manager / external-secrets):
+# trustedCAs:
+#   enabled: true
+#   existingSecret: "my-internal-ca"

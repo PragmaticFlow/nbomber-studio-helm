@@ -2,6 +2,9 @@
 {{- if not $hasSecret }}
   {{- fail "A PostgreSQL connection string is required. Set config.secret.enabled=true with config.secret.data.PostgreSql.ConnectionString, or set config.existingSecret to the name of an existing Secret. Use the full K8s FQDN for the host (e.g. my-pg.default.svc.cluster.local) so that NBomber test Jobs running in a separate namespace can reach PostgreSQL." }}
 {{- end }}
+{{- if and .Values.trustedCAs.enabled (not .Values.trustedCAs.existingSecret) (not .Values.trustedCAs.certs) }}
+  {{- fail "trustedCAs.enabled=true requires either trustedCAs.certs (inline PEM CA cert(s)) or trustedCAs.existingSecret (name of an existing Secret containing PEM CA cert(s))." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,10 +41,40 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "nbomber-studio.serviceAccountName" . }}
+      {{- if .Values.trustedCAs.enabled }}
+      initContainers:
+      - name: merge-ca-bundle
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          cp /etc/ssl/certs/ca-certificates.crt /merged-ca/ca-bundle.crt
+          for f in /custom-ca/*; do
+            [ -f "$f" ] || continue
+            echo "" >> /merged-ca/ca-bundle.crt
+            cat "$f" >> /merged-ca/ca-bundle.crt
+          done
+        volumeMounts:
+        - name: trusted-ca
+          mountPath: /custom-ca
+          readOnly: true
+        - name: merged-ca
+          mountPath: /merged-ca
+      {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.trustedCAs.enabled }}
+        env:
+        # .NET on Linux validates TLS against this OpenSSL bundle. The init
+        # container merged the public roots with the configured CA(s) here.
+        - name: SSL_CERT_FILE
+          value: /merged-ca/ca-bundle.crt
+        {{- end }}
         args:
         - "--test-namespace"
         - {{ .Values.testNamespace.name | quote }}
@@ -59,8 +92,13 @@ spec:
           containerPort: 8080
           protocol: TCP
         
-        {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}        
+        {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret .Values.trustedCAs.enabled }}
         volumeMounts:
+        {{- if .Values.trustedCAs.enabled }}
+        - name: merged-ca
+          mountPath: /merged-ca
+          readOnly: true
+        {{- end }}
         {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
         - name: config-override-cm
           mountPath: /app/config-override-cm.json
@@ -78,8 +116,15 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
           
-      {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret }}
+      {{- if or .Values.config.configMap.enabled .Values.config.secret.enabled .Values.config.existingConfigMap .Values.config.existingSecret .Values.trustedCAs.enabled }}
       volumes:
+      {{- if .Values.trustedCAs.enabled }}
+      - name: trusted-ca
+        secret:
+          secretName: {{ include "nbomber-studio.trustedCASecretName" . }}
+      - name: merged-ca
+        emptyDir: {}
+      {{- end }}
       {{- if or .Values.config.configMap.enabled .Values.config.existingConfigMap }}
       - name: config-override-cm
         configMap:
